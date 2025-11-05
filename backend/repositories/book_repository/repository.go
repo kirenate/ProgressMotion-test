@@ -78,6 +78,17 @@ func (r *Repository) SaveBook(ctx context.Context, book *schemas.Book) error {
 	return nil
 }
 
+func (r *Repository) UpdateBook(ctx context.Context, id uuid.UUID, book *schemas.Book) error {
+	err := r.db.WithContext(ctx).Table("book").
+		Where("id", id).Omit("id", "createdAt", "deletedAt").
+		Updates(&book).Error
+	if err != nil {
+		return errors.Wrap(err, "update book repo")
+	}
+
+	return nil
+}
+
 func (r *Repository) DeleteBook(ctx context.Context, id uuid.UUID) error {
 	err := r.db.WithContext(ctx).Table("book").
 		Where("id", id).

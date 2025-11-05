@@ -44,6 +44,17 @@ func (r *Service) SaveCategory(ctx context.Context, category *schemas.Category) 
 	return nil
 }
 
+func (r *Service) UpdateCategory(ctx context.Context, id uuid.UUID, category *schemas.Category) error {
+	category.UpdatedAt = time.Now().UTC()
+	err := r.repository.UpdateCategory(ctx, id, category)
+	if err != nil {
+		return errors.Wrap(err, "update category")
+	}
+
+	zerolog.Ctx(ctx).Info().Str("id", id.String()).Str("new.name", category.Name).Msg("category.updated")
+	return nil
+}
+
 func (r *Service) DeleteCategory(ctx context.Context, id uuid.UUID) error {
 	err := r.repository.DeleteCategory(ctx, id)
 	if err != nil {

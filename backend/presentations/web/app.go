@@ -8,6 +8,7 @@ import (
 	recover2 "github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/fiber/v2/middleware/timeout"
+	"github.com/golang-jwt/jwt/v5"
 	"main.go/services/authentification_service"
 	book_service "main.go/services/book_service"
 	category_service "main.go/services/category_service"
@@ -35,22 +36,28 @@ func (r *Presentation) BuildApp() *fiber.App {
 	app.Use(logger.New(logger.Config{
 		Format: "${pid} ${locals:requestid} ${status} - ${method} ${path}\n",
 	}))
-	app.Get("/metrics", monitor.New(monitor.Config{Title: "Metrics Page"}))
-
-	app.Post("/auth/register", r.registerUser)
-	app.Post("/auth/login", r.loginUser)
 
 	apiGroup := app.Group("/api")
-	apiGroup.Use(jwtware.New(jwtware.Config{SigningKey: jwtware.SigningKey{Key: []byte(settings_utils.Settings.SigningKey)}}))
+	apiGroup.Use(jwtware.New(jwtware.Config{SigningKey: jwtware.SigningKey{JWTAlg: jwt.SigningMethodHS256.Name, Key: []byte(settings_utils.Settings.SigningKey)}}))
 
-	apiGroup.Get("/books", timeout.NewWithContext(r.listBooks, settings_utils.Settings.Timeout))
-	apiGroup.Get("/books/:category", timeout.NewWithContext(r.listBooksByCategory, settings_utils.Settings.Timeout))
-	apiGroup.Get("/books/:id", timeout.NewWithContext(r.bookInfo, settings_utils.Settings.Timeout))
+	app.Get("/metrics", monitor.New(monitor.Config{Title: "Metrics Page"}))
+	
+	app.Post("/api/auth/register", r.registerUser)
+	app.Post("/api/auth/login", r.loginUser)
+	apiGroup.Post("/auth/logout", r.logoutUser)
+
+	app.Get("/api/books", timeout.NewWithContext(r.listBooks, settings_utils.Settings.Timeout))
+	app.Get("/api/books/:category", timeout.NewWithContext(r.listBooksByCategory, settings_utils.Settings.Timeout))
+	app.Get("/api/books/:id", timeout.NewWithContext(r.bookInfo, settings_utils.Settings.Timeout))
+
 	apiGroup.Post("/books", timeout.NewWithContext(r.saveBook, settings_utils.Settings.Timeout))
+	apiGroup.Patch("/books/:id", timeout.NewWithContext(r.updateBook, settings_utils.Settings.Timeout))
 	apiGroup.Delete("/books/:id", timeout.NewWithContext(r.deleteBook, settings_utils.Settings.Timeout))
 
-	apiGroup.Get("/categories", timeout.NewWithContext(r.listCategories, settings_utils.Settings.Timeout))
+	app.Get("/api/categories", timeout.NewWithContext(r.listCategories, settings_utils.Settings.Timeout))
+
 	apiGroup.Post("/categories", timeout.NewWithContext(r.saveCategory, settings_utils.Settings.Timeout))
+	apiGroup.Patch("categories/:id", timeout.NewWithContext(r.updateCategory, settings_utils.Settings.Timeout))
 	apiGroup.Delete("/categories/:id", timeout.NewWithContext(r.deleteCategory, settings_utils.Settings.Timeout))
 
 	return app

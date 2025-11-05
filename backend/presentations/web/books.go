@@ -2,6 +2,7 @@ package web
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"main.go/schemas"
@@ -46,8 +47,14 @@ func (r *Presentation) bookInfo(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) saveBook(c *fiber.Ctx) error {
+	user := c.Locals("user").(*jwt.Token)
+	err := VerifyToken(user)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized}
+	}
+
 	var book *schemas.Book
-	err := c.BodyParser(&book)
+	err = c.BodyParser(&book)
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
@@ -64,7 +71,39 @@ func (r *Presentation) saveBook(c *fiber.Ctx) error {
 	return nil
 }
 
+func (r *Presentation) updateBook(c *fiber.Ctx) error {
+	user := c.Locals("user").(*jwt.Token)
+	err := VerifyToken(user)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized}
+	}
+
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid book id"}
+	}
+
+	var book *schemas.Book
+	err = c.BodyParser(&book)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
+	}
+
+	err = r.bookService.UpdateBook(c.UserContext(), id, book)
+	if err != nil {
+		return errors.Wrap(err, "failed to update book")
+	}
+
+	return nil
+}
+
 func (r *Presentation) deleteBook(c *fiber.Ctx) error {
+	user := c.Locals("user").(*jwt.Token)
+	err := VerifyToken(user)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized}
+	}
+	
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid book id"}

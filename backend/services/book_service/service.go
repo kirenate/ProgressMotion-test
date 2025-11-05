@@ -63,6 +63,17 @@ func (r *Service) SaveBook(ctx context.Context, book *schemas.Book) error {
 	return nil
 }
 
+func (r *Service) UpdateBook(ctx context.Context, id uuid.UUID, book *schemas.Book) error {
+	book.UpdatedAt = time.Now().UTC()
+	err := r.repository.UpdateBook(ctx, id, book)
+	if err != nil {
+		return errors.Wrap(err, "update book")
+	}
+
+	zerolog.Ctx(ctx).Info().Str("id", id.String()).Msg("book.updated.successfully")
+	return nil
+}
+
 func (r *Service) DeleteBook(ctx context.Context, id uuid.UUID) error {
 	err := r.repository.DeleteBook(ctx, id)
 	if err != nil {

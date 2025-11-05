@@ -4,11 +4,13 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"main.go/repositories/user_repository"
 	"main.go/schemas"
+	"main.go/utils/settings_utils"
 	"time"
 )
 
@@ -77,6 +79,18 @@ func (r *Service) LoginUser(ctx context.Context, req *schemas.LoginRequest) (*sc
 		Msg("new.login.successful")
 
 	return user, nil
+}
+
+func (r *Service) LogoutUser(user *jwt.Token) (string, error) {
+	claims := user.Claims.(jwt.MapClaims)
+	claims["exp"] = time.Now().UTC()
+	user.Claims = claims
+	token, err := user.SignedString(settings_utils.Settings.SigningKey)
+	if err != nil {
+		return "", errors.Wrap(err, "logout user")
+	}
+
+	return token, nil
 }
 
 func saltPassword(password string) (salt string, hashSum string, err error) {

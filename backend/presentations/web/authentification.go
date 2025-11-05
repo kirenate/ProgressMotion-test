@@ -2,9 +2,11 @@ package web
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 	"main.go/schemas"
 	"main.go/services/authentification_service"
+	"main.go/utils/settings_utils"
 	validators_utils "main.go/utils/validator_utils"
 )
 
@@ -60,4 +62,28 @@ func (r *Presentation) loginUser(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"token": token})
+}
+
+func (r *Presentation) logoutUser(c *fiber.Ctx) error {
+	user := c.Locals("user").(*jwt.Token)
+	err := VerifyToken(user)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized}
+	}
+
+	token, err := r.authService.LogoutUser(user)
+	if err != nil {
+		return errors.Wrap(err, "logout failed")
+	}
+	
+	return c.JSON(fiber.Map{"token": token})
+}
+
+func VerifyToken(token *jwt.Token) error {
+	err := jwt.SigningMethodHS256.Verify(token.Method.Alg(), token.Signature, settings_utils.Settings.SigningKey)
+	if err != nil {
+		return errors.Wrap(err, "verification failed")
+	}
+
+	return nil
 }

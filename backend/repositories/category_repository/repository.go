@@ -36,6 +36,17 @@ func (r *Repository) SaveCategory(ctx context.Context, category *schemas.Categor
 	return nil
 }
 
+func (r *Repository) UpdateCategory(ctx context.Context, id uuid.UUID, category *schemas.Category) error {
+	err := r.db.WithContext(ctx).Table("category").
+		Where("id", id).Select("name", "updatedAt").
+		Updates(&category).Error
+	if err != nil {
+		return errors.Wrap(err, "update category repo")
+	}
+
+	return nil
+}
+
 func (r *Repository) DeleteCategory(ctx context.Context, id uuid.UUID) error {
 	err := r.db.WithContext(ctx).Table("category").Where("id", id).Update("deletedAt", time.Now().UTC()).Error
 	if err != nil {
