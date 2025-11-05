@@ -34,3 +34,13 @@ func (r *Service) SaveCategory(ctx context.Context, category *schemas.Category) 
 	zerolog.Ctx(ctx).Info().Interface("category", &category).Msg("category.saved")
 	return nil
 }
+
+func (r *Service) DeleteCategory(ctx context.Context, id uuid.UUID) error {
+	err := r.repository.DeleteCategory(ctx, id)
+	if err != nil {
+		return errors.Wrap(err, "delete category")
+	}
+
+	zerolog.Ctx(ctx).Info().Str("id", id.String()).Msg("category.deleted")
+	return nil
+}

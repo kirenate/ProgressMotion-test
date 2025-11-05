@@ -62,3 +62,13 @@ func (r *Service) SaveBook(ctx context.Context, book *schemas.Book) error {
 	zerolog.Ctx(ctx).Info().Interface("book", book).Msg("book.saved")
 	return nil
 }
+
+func (r *Service) DeleteBook(ctx context.Context, id uuid.UUID) error {
+	err := r.repository.DeleteBook(ctx, id)
+	if err != nil {
+		return errors.Wrap(err, "delete book")
+	}
+
+	zerolog.Ctx(ctx).Info().Str("id", id.String()).Msg("book.deleted")
+	return nil
+}

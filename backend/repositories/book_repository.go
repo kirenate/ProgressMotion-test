@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"main.go/schemas"
+	"time"
 )
 
 type Repository struct {
@@ -20,7 +21,7 @@ func (r *Repository) GetBooks(ctx context.Context, page int, pageSize int) (*[]s
 	var books *[]schemas.Book
 
 	err := r.db.WithContext(ctx).Table("book").
-		Limit(pageSize).Offset(page * pageSize).
+		Limit(pageSize).Offset(page * pageSize).Where("deletedAt IS NULL").
 		Find(&books).Error
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find books")
@@ -35,7 +36,7 @@ func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize 
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		err := r.db.WithContext(ctx).Table("category").
-			Where("name", categoryName).
+			Where("name", categoryName).Where("deletedAt IS NULL").
 			Find(&category).Error
 		if err != nil {
 			return errors.Wrap(err, "failed to find category")
@@ -43,6 +44,7 @@ func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize 
 
 		err = r.db.WithContext(ctx).Table("book").
 			Limit(pageSize).Offset(page*pageSize).Where("categories IN", category.ID).
+			Where("deletedAt IS NULL").
 			Find(&books).Error
 		if err != nil {
 			return errors.Wrap(err, "failed to find books")
@@ -71,6 +73,18 @@ func (r *Repository) SaveBook(ctx context.Context, book *schemas.Book) error {
 	err := r.db.WithContext(ctx).Table("book").Save(&book).Error
 	if err != nil {
 		return errors.Wrap(err, "save book repo")
+	}
+
+	return nil
+}
+
+func (r *Repository) DeleteBook(ctx context.Context, id uuid.UUID) error {
+	err := r.db.WithContext(ctx).Table("book").
+		Where("id", id).
+		Update("deletedAt", time.Now().UTC()).Error
+
+	if err != nil {
+		return errors.Wrap(err, "delete book repo")
 	}
 
 	return nil

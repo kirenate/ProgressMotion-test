@@ -63,3 +63,17 @@ func (r *Presentation) saveBook(c *fiber.Ctx) error {
 
 	return nil
 }
+
+func (r *Presentation) deleteBook(c *fiber.Ctx) error {
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid book id"}
+	}
+
+	err = r.service.DeleteBook(c.UserContext(), id)
+	if err != nil {
+		return errors.Wrap(err, "failed to delete book")
+	}
+
+	return nil
+}

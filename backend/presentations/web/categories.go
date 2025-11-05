@@ -2,6 +2,7 @@ package web
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"main.go/schemas"
 	validators_utils "main.go/utils/validator_utils"
@@ -34,5 +35,19 @@ func (r *Presentation) saveCategory(c *fiber.Ctx) error {
 	}
 
 	c.Status(fiber.StatusCreated)
+	return nil
+}
+
+func (r *Presentation) deleteCategory(c *fiber.Ctx) error {
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid category id"}
+	}
+
+	err = r.service.DeleteCategory(c.UserContext(), id)
+	if err != nil {
+		return errors.Wrap(err, "failed to delete category")
+	}
+
 	return nil
 }

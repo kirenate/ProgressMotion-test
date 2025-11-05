@@ -33,11 +33,12 @@ func (r *Presentation) BuildApp() *fiber.App {
 	app.Get("/api/books", timeout.NewWithContext(r.listBooks, settings_utils.Settings.Timeout))
 	app.Get("/api/books/:category", timeout.NewWithContext(r.listBooksByCategory, settings_utils.Settings.Timeout))
 	app.Get("/api/books/:id", timeout.NewWithContext(r.bookInfo, settings_utils.Settings.Timeout))
+	app.Post("/api/books", timeout.NewWithContext(r.saveBook, settings_utils.Settings.Timeout))
+	app.Delete("/api/books/:id", timeout.NewWithContext(r.deleteBook, settings_utils.Settings.Timeout))
 
 	app.Get("/api/categories", timeout.NewWithContext(r.listCategories, settings_utils.Settings.Timeout))
 	app.Post("/api/categories", timeout.NewWithContext(r.saveCategory, settings_utils.Settings.Timeout))
-
-	app.Post("/api/books", timeout.NewWithContext(r.saveBook, settings_utils.Settings.Timeout))
+	app.Delete("/api/categories/:id", timeout.NewWithContext(r.deleteCategory, settings_utils.Settings.Timeout))
 
 	return app
 }
