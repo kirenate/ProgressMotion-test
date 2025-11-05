@@ -10,7 +10,9 @@ import (
 	"main.go/presentations/web"
 	"main.go/repositories/book_repository"
 	"main.go/repositories/category_repository"
+	"main.go/repositories/user_repository"
 	"main.go/schemas"
+	"main.go/services/authentification_service"
 	book_service "main.go/services/book_service"
 	category_service "main.go/services/category_service"
 	"main.go/utils/settings_utils"
@@ -36,11 +38,13 @@ func main() {
 
 	bookRepo := book_repository.NewRepository(db)
 	categoryRepo := category_repository.NewRepositpory(db)
+	userRepo := user_repository.NewRepository(db)
 
 	bookService := book_service.NewService(bookRepo)
 	categoryService := category_service.NewService(categoryRepo)
+	authService := authentification_service.NewService(userRepo)
 
-	presentation := web.NewPresentation(bookService, categoryService)
+	presentation := web.NewPresentation(bookService, categoryService, authService)
 
 	app := presentation.BuildApp()
 

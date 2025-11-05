@@ -1,12 +1,14 @@
 package web
 
 import (
-	fiber "github.com/gofiber/fiber/v2"
+	jwtware "github.com/gofiber/contrib/jwt"
+	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	recover2 "github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/fiber/v2/middleware/timeout"
+	"main.go/services/authentification_service"
 	book_service "main.go/services/book_service"
 	category_service "main.go/services/category_service"
 	"main.go/utils/settings_utils"
@@ -15,10 +17,13 @@ import (
 type Presentation struct {
 	bookService     *book_service.Service
 	categoryService *category_service.Service
+	authService     *authentification_service.Service
 }
 
-func NewPresentation(bookService *book_service.Service, categoryService *category_service.Service) *Presentation {
-	return &Presentation{bookService: bookService, categoryService: categoryService}
+func NewPresentation(bookService *book_service.Service,
+	categoryService *category_service.Service,
+	authService *authentification_service.Service) *Presentation {
+	return &Presentation{bookService: bookService, categoryService: categoryService, authService: authService}
 }
 
 func (r *Presentation) BuildApp() *fiber.App {
@@ -30,17 +35,23 @@ func (r *Presentation) BuildApp() *fiber.App {
 	app.Use(logger.New(logger.Config{
 		Format: "${pid} ${locals:requestid} ${status} - ${method} ${path}\n",
 	}))
-	app.Get("/api/metrics", monitor.New(monitor.Config{Title: "Metrics Page"}))
+	app.Get("/metrics", monitor.New(monitor.Config{Title: "Metrics Page"}))
 
-	app.Get("/api/books", timeout.NewWithContext(r.listBooks, settings_utils.Settings.Timeout))
-	app.Get("/api/books/:category", timeout.NewWithContext(r.listBooksByCategory, settings_utils.Settings.Timeout))
-	app.Get("/api/books/:id", timeout.NewWithContext(r.bookInfo, settings_utils.Settings.Timeout))
-	app.Post("/api/books", timeout.NewWithContext(r.saveBook, settings_utils.Settings.Timeout))
-	app.Delete("/api/books/:id", timeout.NewWithContext(r.deleteBook, settings_utils.Settings.Timeout))
+	app.Post("/auth/register", r.registerUser)
+	app.Post("/auth/login", r.loginUser)
 
-	app.Get("/api/categories", timeout.NewWithContext(r.listCategories, settings_utils.Settings.Timeout))
-	app.Post("/api/categories", timeout.NewWithContext(r.saveCategory, settings_utils.Settings.Timeout))
-	app.Delete("/api/categories/:id", timeout.NewWithContext(r.deleteCategory, settings_utils.Settings.Timeout))
+	apiGroup := app.Group("/api")
+	apiGroup.Use(jwtware.New(jwtware.Config{SigningKey: jwtware.SigningKey{Key: []byte(settings_utils.Settings.SigningKey)}}))
+
+	apiGroup.Get("/books", timeout.NewWithContext(r.listBooks, settings_utils.Settings.Timeout))
+	apiGroup.Get("/books/:category", timeout.NewWithContext(r.listBooksByCategory, settings_utils.Settings.Timeout))
+	apiGroup.Get("/books/:id", timeout.NewWithContext(r.bookInfo, settings_utils.Settings.Timeout))
+	apiGroup.Post("/books", timeout.NewWithContext(r.saveBook, settings_utils.Settings.Timeout))
+	apiGroup.Delete("/books/:id", timeout.NewWithContext(r.deleteBook, settings_utils.Settings.Timeout))
+
+	apiGroup.Get("/categories", timeout.NewWithContext(r.listCategories, settings_utils.Settings.Timeout))
+	apiGroup.Post("/categories", timeout.NewWithContext(r.saveCategory, settings_utils.Settings.Timeout))
+	apiGroup.Delete("/categories/:id", timeout.NewWithContext(r.deleteCategory, settings_utils.Settings.Timeout))
 
 	return app
 }

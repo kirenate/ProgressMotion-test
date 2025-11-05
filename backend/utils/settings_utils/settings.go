@@ -17,6 +17,9 @@ type Setting struct {
 	MysqlDbname string `env:"MYSQL_DBNAME,default=dbname"`
 
 	Timeout time.Duration `env:"TIMEOUT,default=1m,strict"`
+
+	SigningKey string        `env:"SIGNING_KEY"`
+	JwtTtl     time.Duration `env:"JWT_TTL"`
 }
 
 func NewConfig() *Setting {

@@ -31,6 +31,7 @@ type Cart struct {
 	BookIds []uuid.UUID `json:"bookIds"`
 }
 
-type User struct {
-	ID uuid.UUID `json:"id"`
+type LoginRequest struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
