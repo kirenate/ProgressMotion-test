@@ -5,9 +5,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
+	"main.go/repositories/category_repository"
 	"main.go/schemas"
 	"time"
 )
+
+type Service struct {
+	repository *category_repository.Repository
+}
+
+func NewService(repository *category_repository.Repository) *Service {
+	return &Service{repository: repository}
+}
 
 func (r *Service) ListCategories(ctx context.Context) (*[]schemas.Category, error) {
 	categories, err := r.repository.GetCategories(ctx)

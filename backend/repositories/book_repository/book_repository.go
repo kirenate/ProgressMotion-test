@@ -1,4 +1,4 @@
-package repositories
+package book_repository
 
 import (
 	"context"

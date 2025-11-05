@@ -9,7 +9,7 @@ import (
 )
 
 func (r *Presentation) listCategories(c *fiber.Ctx) error {
-	categories, err := r.service.ListCategories(c.UserContext())
+	categories, err := r.categoryService.ListCategories(c.UserContext())
 	if err != nil {
 		return errors.Wrap(err, "failed to list categories")
 	}
@@ -29,7 +29,7 @@ func (r *Presentation) saveCategory(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
 
-	err = r.service.SaveCategory(c.UserContext(), category)
+	err = r.categoryService.SaveCategory(c.UserContext(), category)
 	if err != nil {
 		return errors.Wrap(err, "failed to save category")
 	}
@@ -44,7 +44,7 @@ func (r *Presentation) deleteCategory(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid category id"}
 	}
 
-	err = r.service.DeleteCategory(c.UserContext(), id)
+	err = r.categoryService.DeleteCategory(c.UserContext(), id)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete category")
 	}

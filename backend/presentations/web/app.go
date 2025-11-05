@@ -7,16 +7,18 @@ import (
 	recover2 "github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/fiber/v2/middleware/timeout"
-	"main.go/services"
+	book_service "main.go/services/book_service"
+	category_service "main.go/services/category_service"
 	"main.go/utils/settings_utils"
 )
 
 type Presentation struct {
-	service *services.Service
+	bookService     *book_service.Service
+	categoryService *category_service.Service
 }
 
-func NewPresentation(service *services.Service) *Presentation {
-	return &Presentation{service: service}
+func NewPresentation(bookService *book_service.Service, categoryService *category_service.Service) *Presentation {
+	return &Presentation{bookService: bookService, categoryService: categoryService}
 }
 
 func (r *Presentation) BuildApp() *fiber.App {

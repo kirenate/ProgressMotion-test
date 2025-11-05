@@ -24,3 +24,13 @@ type Category struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 	DeletedAt time.Time `json:"deletedAt"`
 }
+
+type Cart struct {
+	ID      uuid.UUID   `json:"id" gorm:"primaryKey"`
+	UserId  uuid.UUID   `json:"userId"`
+	BookIds []uuid.UUID `json:"bookIds"`
+}
+
+type User struct {
+	ID uuid.UUID `json:"id"`
+}

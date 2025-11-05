@@ -8,9 +8,11 @@ import (
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 	"main.go/presentations/web"
-	"main.go/repositories"
+	"main.go/repositories/book_repository"
+	"main.go/repositories/category_repository"
 	"main.go/schemas"
-	"main.go/services"
+	book_service "main.go/services/book_service"
+	category_service "main.go/services/category_service"
 	"main.go/utils/settings_utils"
 )
 
@@ -32,11 +34,13 @@ func main() {
 		panic(errors.Wrap(err, "failed to merge database"))
 	}
 
-	repository := repositories.NewRepository(db)
+	bookRepo := book_repository.NewRepository(db)
+	categoryRepo := category_repository.NewRepositpory(db)
 
-	service := services.NewService(repository)
+	bookService := book_service.NewService(bookRepo)
+	categoryService := category_service.NewService(categoryRepo)
 
-	presentation := web.NewPresentation(service)
+	presentation := web.NewPresentation(bookService, categoryService)
 
 	app := presentation.BuildApp()
 

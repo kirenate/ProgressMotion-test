@@ -1,12 +1,21 @@
-package repositories
+package category_repository
 
 import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	"main.go/schemas"
 	"time"
 )
+
+type Repository struct {
+	db *gorm.DB
+}
+
+func NewRepositpory(db *gorm.DB) *Repository {
+	return &Repository{db: db}
+}
 
 func (r *Repository) GetCategories(ctx context.Context) (*[]schemas.Category, error) {
 	var categories *[]schemas.Category

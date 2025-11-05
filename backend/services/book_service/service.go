@@ -5,16 +5,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
-	"main.go/repositories"
+	"main.go/repositories/book_repository"
 	"main.go/schemas"
 	"time"
 )
 
 type Service struct {
-	repository *repositories.Repository
+	repository *book_repository.Repository
 }
 
-func NewService(repo *repositories.Repository) *Service {
+func NewService(repo *book_repository.Repository) *Service {
 	return &Service{repository: repo}
 }
 
