@@ -1,0 +1,65 @@
+package web
+
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
+	"main.go/schemas"
+	validators_utils "main.go/utils/validator_utils"
+)
+
+func (r *Presentation) listBooks(c *fiber.Ctx) error {
+	page := c.QueryInt("page")
+	pageSize := c.QueryInt("pageSize")
+	books, err := r.service.GetBooks(c.UserContext(), page, pageSize)
+	if err != nil {
+		return errors.Wrap(err, "list books")
+	}
+
+	return c.JSON(fiber.Map{"books": books})
+}
+
+func (r *Presentation) listBooksByCategory(c *fiber.Ctx) error {
+	page := c.QueryInt("page")
+	pageSize := c.QueryInt("pageSize")
+	categoryName := c.Params("category")
+	if categoryName == "" || page <= 0 || pageSize <= 1 {
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
+	}
+
+	books, err := r.service.GetBooksByCategory(c.UserContext(), page, pageSize, categoryName)
+	if err != nil {
+		return errors.Wrap(err, "list books by category")
+	}
+
+	return c.JSON(fiber.Map{"books": books})
+}
+
+func (r *Presentation) bookInfo(c *fiber.Ctx) error {
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid book id"}
+	}
+	book, err := r.service.BookInfo(c.UserContext(), id)
+
+	return c.JSON(fiber.Map{"book": book})
+}
+
+func (r *Presentation) saveBook(c *fiber.Ctx) error {
+	var book *schemas.Book
+	err := c.BodyParser(&book)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
+	}
+
+	err = validators_utils.Validate.StructExcept(&book, "ID", "CreatedAt", "UpdatedAt", "DeletedAt")
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
+	}
+
+	err = r.service.SaveBook(c.UserContext(), book)
+
+	c.Status(fiber.StatusCreated)
+
+	return nil
+}
