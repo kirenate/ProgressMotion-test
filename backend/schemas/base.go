@@ -26,9 +26,13 @@ type Category struct {
 }
 
 type Cart struct {
-	ID      uuid.UUID   `json:"id" gorm:"primaryKey"`
-	UserId  uuid.UUID   `json:"userId"`
-	BookIds []uuid.UUID `json:"bookIds"`
+	ID         uuid.UUID   `json:"id" gorm:"primaryKey"`
+	UserId     uuid.UUID   `json:"userId"`
+	BookIds    []uuid.UUID `json:"bookIds"`
+	TotalPrice int         `json:"totalPrice"`
+	CreatedAt  time.Time   `json:"createdAt"`
+	UpdatedAt  time.Time   `json:"updatedAt"`
+	DeletedAt  time.Time   `json:"deletedAt"`
 }
 
 type LoginRequest struct {

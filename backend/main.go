@@ -9,11 +9,13 @@ import (
 	"gorm.io/gorm/schema"
 	"main.go/presentations/web"
 	"main.go/repositories/book_repository"
+	"main.go/repositories/cart_repository"
 	"main.go/repositories/category_repository"
 	"main.go/repositories/user_repository"
 	"main.go/schemas"
 	"main.go/services/authentification_service"
 	book_service "main.go/services/book_service"
+	"main.go/services/cart_service"
 	category_service "main.go/services/category_service"
 	"main.go/utils/settings_utils"
 )
@@ -39,12 +41,14 @@ func main() {
 	bookRepo := book_repository.NewRepository(db)
 	categoryRepo := category_repository.NewRepositpory(db)
 	userRepo := user_repository.NewRepository(db)
+	cartRepo := cart_repository.NewRepository(db)
 
 	bookService := book_service.NewService(bookRepo)
 	categoryService := category_service.NewService(categoryRepo)
 	authService := authentification_service.NewService(userRepo)
+	cartService := cart_service.NewService(cartRepo)
 
-	presentation := web.NewPresentation(bookService, categoryService, authService)
+	presentation := web.NewPresentation(bookService, categoryService, authService, cartService)
 
 	app := presentation.BuildApp()
 

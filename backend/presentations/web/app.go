@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"main.go/services/authentification_service"
 	book_service "main.go/services/book_service"
+	"main.go/services/cart_service"
 	category_service "main.go/services/category_service"
 	"main.go/utils/settings_utils"
 )
@@ -19,12 +20,16 @@ type Presentation struct {
 	bookService     *book_service.Service
 	categoryService *category_service.Service
 	authService     *authentification_service.Service
+	cartService     *cart_service.Service
 }
 
 func NewPresentation(bookService *book_service.Service,
 	categoryService *category_service.Service,
-	authService *authentification_service.Service) *Presentation {
-	return &Presentation{bookService: bookService, categoryService: categoryService, authService: authService}
+	authService *authentification_service.Service,
+	cartService *cart_service.Service) *Presentation {
+	return &Presentation{bookService: bookService,
+		categoryService: categoryService, authService: authService,
+		cartService: cartService}
 }
 
 func (r *Presentation) BuildApp() *fiber.App {
@@ -60,6 +65,8 @@ func (r *Presentation) BuildApp() *fiber.App {
 	apiGroup.Post("/categories", timeout.NewWithContext(r.saveCategory, settings_utils.Settings.Timeout))
 	apiGroup.Patch("categories/:id", timeout.NewWithContext(r.updateCategory, settings_utils.Settings.Timeout))
 	apiGroup.Delete("/categories/:id", timeout.NewWithContext(r.deleteCategory, settings_utils.Settings.Timeout))
+
+	apiGroup.Post("/cart", timeout.NewWithContext(r.addToCart, settings_utils.Settings.Timeout))
 
 	return app
 }
