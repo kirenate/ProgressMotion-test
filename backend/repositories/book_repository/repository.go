@@ -115,3 +115,23 @@ func (r *Repository) SearchBooks(ctx context.Context, page int, pageSize int, ph
 
 	return books, nil
 }
+
+func (r *Repository) GetBooksInCart(ctx context.Context, bookIds []uuid.UUID) (*[]schemas.Book, error) {
+	var books *[]schemas.Book
+	err := r.db.WithContext(ctx).Table("book").Where("id IN ?", bookIds).Find(&books).Error
+	if err != nil {
+		return nil, errors.Wrap(err, "get books in cart repo")
+	}
+
+	return books, nil
+}
+
+func (r *Repository) GetBookPrice(ctx context.Context, bookId uuid.UUID) (int, error) {
+	var price int
+	err := r.db.WithContext(ctx).Table("book").Where("id", bookId).Select("price").Find(&price).Error
+	if err != nil {
+		return 0, errors.Wrap(err, "get book price repo")
+	}
+
+	return price, nil
+}

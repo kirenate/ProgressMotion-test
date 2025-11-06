@@ -66,7 +66,9 @@ func (r *Presentation) BuildApp() *fiber.App {
 	apiGroup.Patch("categories/:id", timeout.NewWithContext(r.updateCategory, settings_utils.Settings.Timeout))
 	apiGroup.Delete("/categories/:id", timeout.NewWithContext(r.deleteCategory, settings_utils.Settings.Timeout))
 
+	apiGroup.Get("/cart", timeout.NewWithContext(r.getCart, settings_utils.Settings.Timeout))
 	apiGroup.Post("/cart", timeout.NewWithContext(r.addToCart, settings_utils.Settings.Timeout))
+	apiGroup.Delete("/cart/:id", timeout.NewWithContext(r.deleteFromCart, settings_utils.Settings.Timeout))
 
 	return app
 }
