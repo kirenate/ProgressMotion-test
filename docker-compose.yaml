@@ -1,0 +1,32 @@
+services:
+  backend:
+    restart: always
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    volumes:
+      - ".data:/.data"
+      - "./backend/.env:/.env"
+
+  nginx:
+    image: nginx:1.25.4-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    volumes:
+      - "./nginx/ssl_nginx.conf:/etc/nginx/conf.d/default.conf"
+      - "/etc/letsencrypt:/etc/letsencrypt"
+      - "/data/letsencrypt:/data/letsencrypt"
+      - "./frontend:/frontend"
+
+  mysql:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: $MYSQL_DBNAME
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+    ports:
+      - "3306:3306"
