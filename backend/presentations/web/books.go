@@ -2,7 +2,6 @@ package web
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"main.go/schemas"
@@ -12,6 +11,9 @@ import (
 func (r *Presentation) listBooks(c *fiber.Ctx) error {
 	page := c.QueryInt("page")
 	pageSize := c.QueryInt("pageSize")
+	if page < 0 || pageSize < 1 {
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
+	}
 	books, err := r.bookService.GetBooks(c.UserContext(), page, pageSize)
 	if err != nil {
 		return errors.Wrap(err, "list books")
@@ -24,7 +26,7 @@ func (r *Presentation) listBooksByCategory(c *fiber.Ctx) error {
 	page := c.QueryInt("page")
 	pageSize := c.QueryInt("pageSize")
 	categoryName := c.Params("category")
-	if categoryName == "" || page <= 0 || pageSize <= 1 {
+	if categoryName == "" || page < 0 || pageSize < 1 {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
 
@@ -47,14 +49,8 @@ func (r *Presentation) bookInfo(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) saveBook(c *fiber.Ctx) error {
-	user := c.Locals("user").(*jwt.Token)
-	err := VerifyToken(user)
-	if err != nil {
-		return &fiber.Error{Code: fiber.StatusUnauthorized}
-	}
-
 	var book *schemas.Book
-	err = c.BodyParser(&book)
+	err := c.BodyParser(&book)
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
@@ -72,12 +68,6 @@ func (r *Presentation) saveBook(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) updateBook(c *fiber.Ctx) error {
-	user := c.Locals("user").(*jwt.Token)
-	err := VerifyToken(user)
-	if err != nil {
-		return &fiber.Error{Code: fiber.StatusUnauthorized}
-	}
-
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid book id"}
@@ -98,12 +88,6 @@ func (r *Presentation) updateBook(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) deleteBook(c *fiber.Ctx) error {
-	user := c.Locals("user").(*jwt.Token)
-	err := VerifyToken(user)
-	if err != nil {
-		return &fiber.Error{Code: fiber.StatusUnauthorized}
-	}
-	
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid book id"}
@@ -115,4 +99,23 @@ func (r *Presentation) deleteBook(c *fiber.Ctx) error {
 	}
 
 	return nil
+}
+
+func (r *Presentation) searchBooks(c *fiber.Ctx) error {
+	phrase := c.Query("phrase")
+	if phrase == "" {
+		return nil
+	}
+	page := c.QueryInt("page")
+	pageSize := c.QueryInt("pageSize")
+	if page < 0 || pageSize < 1 {
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
+	}
+
+	books, err := r.bookService.SearchBooks(c.UserContext(), page, pageSize, phrase)
+	if err != nil {
+		return errors.Wrap(err, "failed to search books")
+	}
+
+	return c.JSON(fiber.Map{"books": books})
 }

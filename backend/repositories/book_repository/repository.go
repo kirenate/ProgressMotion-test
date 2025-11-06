@@ -100,3 +100,17 @@ func (r *Repository) DeleteBook(ctx context.Context, id uuid.UUID) error {
 
 	return nil
 }
+
+func (r *Repository) SearchBooks(ctx context.Context, page int, pageSize int, phrase string) (*[]schemas.Book, error) {
+	var books *[]schemas.Book
+	phrase = "%" + phrase + "%"
+	err := r.db.WithContext(ctx).Table("book").
+		Where("name ILIKE ?", phrase).
+		Limit(pageSize).Offset(page * pageSize).
+		Find(&books).Error
+	if err != nil {
+		return nil, errors.Wrap(err, "search books repo")
+	}
+
+	return books, nil
+}

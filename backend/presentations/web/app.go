@@ -41,7 +41,7 @@ func (r *Presentation) BuildApp() *fiber.App {
 	apiGroup.Use(jwtware.New(jwtware.Config{SigningKey: jwtware.SigningKey{JWTAlg: jwt.SigningMethodHS256.Name, Key: []byte(settings_utils.Settings.SigningKey)}}))
 
 	app.Get("/metrics", monitor.New(monitor.Config{Title: "Metrics Page"}))
-	
+
 	app.Post("/api/auth/register", r.registerUser)
 	app.Post("/api/auth/login", r.loginUser)
 	apiGroup.Post("/auth/logout", r.logoutUser)
@@ -49,6 +49,7 @@ func (r *Presentation) BuildApp() *fiber.App {
 	app.Get("/api/books", timeout.NewWithContext(r.listBooks, settings_utils.Settings.Timeout))
 	app.Get("/api/books/:category", timeout.NewWithContext(r.listBooksByCategory, settings_utils.Settings.Timeout))
 	app.Get("/api/books/:id", timeout.NewWithContext(r.bookInfo, settings_utils.Settings.Timeout))
+	app.Get("/api/books/search", timeout.NewWithContext(r.searchBooks, settings_utils.Settings.Timeout))
 
 	apiGroup.Post("/books", timeout.NewWithContext(r.saveBook, settings_utils.Settings.Timeout))
 	apiGroup.Patch("/books/:id", timeout.NewWithContext(r.updateBook, settings_utils.Settings.Timeout))

@@ -83,3 +83,13 @@ func (r *Service) DeleteBook(ctx context.Context, id uuid.UUID) error {
 	zerolog.Ctx(ctx).Info().Str("id", id.String()).Msg("book.deleted")
 	return nil
 }
+
+func (r *Service) SearchBooks(ctx context.Context, page int, pageSize int, phrase string) (*[]schemas.Book, error) {
+	books, err := r.repository.SearchBooks(ctx, page, pageSize, phrase)
+	if err != nil {
+		return nil, errors.Wrap(err, "search book")
+	}
+
+	zerolog.Ctx(ctx).Info().Str("phrase", phrase).Int("amount", len(*books)).Msg("books.found")
+	return books, nil
+}
