@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"main.go/schemas"
 	validators_utils "main.go/utils/validator_utils"
+	"strings"
 )
 
 func (r *Presentation) listBooks(c *fiber.Ctx) error {
@@ -14,7 +15,21 @@ func (r *Presentation) listBooks(c *fiber.Ctx) error {
 	if page < 0 || pageSize < 1 {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
-	books, err := r.bookService.GetBooks(c.UserContext(), page, pageSize)
+	sortBy := c.Query("sortBy", "name")
+	orderBy := c.Query("orderBy", "DESC")
+	orderBy = strings.ToUpper(orderBy)
+
+	err := VerifySort(sortBy)
+	if err != nil {
+		sortBy = "name"
+	}
+
+	err = VerifyOrder(orderBy)
+	if err != nil {
+		orderBy = "DESC"
+	}
+
+	books, err := r.bookService.GetBooks(c.UserContext(), page, pageSize, sortBy, orderBy)
 	if err != nil {
 		return errors.Wrap(err, "list books")
 	}
@@ -29,8 +44,20 @@ func (r *Presentation) listBooksByCategory(c *fiber.Ctx) error {
 	if categoryName == "" || page < 0 || pageSize < 1 {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
+	sortBy := c.Query("sortBy", "name")
+	orderBy := c.Query("orderBy", "DESC")
+	orderBy = strings.ToUpper(orderBy)
 
-	books, err := r.bookService.GetBooksByCategory(c.UserContext(), page, pageSize, categoryName)
+	err := VerifySort(sortBy)
+	if err != nil {
+		sortBy = "name"
+	}
+
+	err = VerifyOrder(orderBy)
+	if err != nil {
+		orderBy = "DESC"
+	}
+	books, err := r.bookService.GetBooksByCategory(c.UserContext(), page, pageSize, categoryName, sortBy, orderBy)
 	if err != nil {
 		return errors.Wrap(err, "list books by category")
 	}
@@ -111,11 +138,42 @@ func (r *Presentation) searchBooks(c *fiber.Ctx) error {
 	if page < 0 || pageSize < 1 {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
+	sortBy := c.Query("sortBy", "name")
+	orderBy := c.Query("orderBy", "DESC")
+	orderBy = strings.ToUpper(orderBy)
 
-	books, err := r.bookService.SearchBooks(c.UserContext(), page, pageSize, phrase)
+	err := VerifySort(sortBy)
+	if err != nil {
+		sortBy = "name"
+	}
+
+	err = VerifyOrder(orderBy)
+	if err != nil {
+		orderBy = "DESC"
+	}
+	books, err := r.bookService.SearchBooks(c.UserContext(), page, pageSize, phrase, sortBy, orderBy)
 	if err != nil {
 		return errors.Wrap(err, "failed to search books")
 	}
 
 	return c.JSON(fiber.Map{"books": books})
 }
+
+func VerifySort(sort string) error {
+	if sort == "name" || sort == "authors" || sort == "price" {
+		return nil
+	}
+
+	return ErrWrongSorting
+}
+
+func VerifyOrder(order string) error {
+	if order == "DESC" || order == "ASC" {
+		return nil
+	}
+
+	return ErrWrongOrder
+}
+
+var ErrWrongSorting = errors.New("invalid sorting field")
+var ErrWrongOrder = errors.New("invalid order field")

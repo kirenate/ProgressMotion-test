@@ -17,11 +17,11 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) GetBooks(ctx context.Context, page int, pageSize int) (*[]schemas.Book, error) {
+func (r *Repository) GetBooks(ctx context.Context, page int, pageSize int, sortBy, orderBy string) (*[]schemas.Book, error) {
 	var books *[]schemas.Book
-
 	err := r.db.WithContext(ctx).Table("book").
 		Limit(pageSize).Offset(page * pageSize).Where("deletedAt IS NULL").
+		Order(sortBy + " " + orderBy).
 		Find(&books).Error
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find books")
@@ -30,13 +30,14 @@ func (r *Repository) GetBooks(ctx context.Context, page int, pageSize int) (*[]s
 	return books, nil
 }
 
-func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize int, categoryName string) (*[]schemas.Book, error) {
+func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize int, categoryName string, sortBy, orderBy string) (*[]schemas.Book, error) {
 	var books *[]schemas.Book
 	var category *schemas.Category
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		err := r.db.WithContext(ctx).Table("category").
 			Where("name", categoryName).Where("deletedAt IS NULL").
+			Order(sortBy + " " + orderBy).
 			Find(&category).Error
 		if err != nil {
 			return errors.Wrap(err, "failed to find category")
@@ -101,12 +102,12 @@ func (r *Repository) DeleteBook(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (r *Repository) SearchBooks(ctx context.Context, page int, pageSize int, phrase string) (*[]schemas.Book, error) {
+func (r *Repository) SearchBooks(ctx context.Context, page int, pageSize int, phrase string, sortBy, orderBy string) (*[]schemas.Book, error) {
 	var books *[]schemas.Book
 	phrase = "%" + phrase + "%"
 	err := r.db.WithContext(ctx).Table("book").
-		Where("name ILIKE ?", phrase).
-		Limit(pageSize).Offset(page * pageSize).
+		Where("name ILIKE ?", phrase).Where("deletedAt IS NULL").
+		Limit(pageSize).Offset(page * pageSize).Order(sortBy + " " + orderBy).
 		Find(&books).Error
 	if err != nil {
 		return nil, errors.Wrap(err, "search books repo")

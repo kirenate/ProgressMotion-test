@@ -18,8 +18,8 @@ func NewService(repo *book_repository.Repository) *Service {
 	return &Service{repository: repo}
 }
 
-func (r *Service) GetBooks(ctx context.Context, page int, pageSize int) (*[]schemas.Book, error) {
-	books, err := r.repository.GetBooks(ctx, page, pageSize)
+func (r *Service) GetBooks(ctx context.Context, page int, pageSize int, sortBy, orderBy string) (*[]schemas.Book, error) {
+	books, err := r.repository.GetBooks(ctx, page, pageSize, sortBy, orderBy)
 	if err != nil {
 		return nil, errors.Wrap(err, "get books service")
 	}
@@ -28,8 +28,8 @@ func (r *Service) GetBooks(ctx context.Context, page int, pageSize int) (*[]sche
 	return books, nil
 }
 
-func (r *Service) GetBooksByCategory(ctx context.Context, page int, pageSize int, categoryName string) (*[]schemas.Book, error) {
-	books, err := r.repository.GetBooksByCategory(ctx, page, pageSize, categoryName)
+func (r *Service) GetBooksByCategory(ctx context.Context, page int, pageSize int, categoryName string, sortBy, orderBy string) (*[]schemas.Book, error) {
+	books, err := r.repository.GetBooksByCategory(ctx, page, pageSize, categoryName, sortBy, orderBy)
 	if err != nil {
 		return nil, errors.Wrap(err, "get books service")
 	}
@@ -84,8 +84,8 @@ func (r *Service) DeleteBook(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (r *Service) SearchBooks(ctx context.Context, page int, pageSize int, phrase string) (*[]schemas.Book, error) {
-	books, err := r.repository.SearchBooks(ctx, page, pageSize, phrase)
+func (r *Service) SearchBooks(ctx context.Context, page int, pageSize int, phrase string, sortBy, orderBy string) (*[]schemas.Book, error) {
+	books, err := r.repository.SearchBooks(ctx, page, pageSize, phrase, sortBy, orderBy)
 	if err != nil {
 		return nil, errors.Wrap(err, "search book")
 	}
