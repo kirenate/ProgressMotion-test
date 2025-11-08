@@ -32,7 +32,7 @@ type Cart struct {
 	TotalPrice int         `json:"totalPrice"`
 	CreatedAt  time.Time   `json:"createdAt"`
 	UpdatedAt  time.Time   `json:"updatedAt"`
-	DeletedAt  time.Time   `json:"deletedAt,omitemptygit" gorm:"default:NULL"`
+	DeletedAt  time.Time   `json:"deletedAt,omitempty" gorm:"default:NULL"`
 }
 
 type LoginRequest struct {
