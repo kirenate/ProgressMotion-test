@@ -7,7 +7,7 @@ import Pagination from '../components/Pagination';
 import BookModal from '../components/BookModal';
 import { fetchCategories, fetchBooks, createBook, updateBook, deleteBook } from '../utils/api';
 import { logout } from '../utils/api';
-import { getToken, getUserInfo } from '../utils/auth';
+import { getToken, getUserInfo, setToken } from '../utils/auth';
 import '../App.css';
 
 const PAGE_SIZE = 10;
@@ -78,9 +78,24 @@ function Home() {
 
     const handleLogout = async () => {
         const token = getToken();
+        
+        // Step 1: Call backend to invalidate token
         if (token) {
-            await logout(token);
+            try {
+                await logout(token);
+            } catch (error) {
+                // Even if backend call fails, proceed with local logout
+                console.error('Logout API error:', error);
+            }
         }
+        
+        // Step 2: Clear local storage
+        setToken(null);
+        
+        // Step 3: Dispatch event to clear cart count
+        window.dispatchEvent(new Event('cartUpdated'));
+        
+        // Step 4: Navigate and reload
         navigate('/');
         window.location.reload();
     };

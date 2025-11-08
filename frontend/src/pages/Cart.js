@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { isAuthenticated } from '../utils/auth';
-import { getCart, removeFromCart, addToCart } from '../utils/api';
+import { isAuthenticated, getToken, setToken } from '../utils/auth';
+import { getCart, removeFromCart, addToCart, logout } from '../utils/api';
 import Header from '../components/Header';
 import '../App.css';
 
@@ -88,6 +88,25 @@ function Cart() {
     };
 
     const handleLogout = async () => {
+        const token = getToken();
+        
+        // Step 1: Call backend to invalidate token
+        if (token) {
+            try {
+                await logout(token);
+            } catch (error) {
+                // Even if backend call fails, proceed with local logout
+                console.error('Logout API error:', error);
+            }
+        }
+        
+        // Step 2: Clear local storage
+        setToken(null);
+        
+        // Step 3: Dispatch event to clear cart count
+        window.dispatchEvent(new Event('cartUpdated'));
+        
+        // Step 4: Navigate and reload
         navigate('/');
         window.location.reload();
     };
