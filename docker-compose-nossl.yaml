@@ -9,6 +9,7 @@ services:
       - "./backend/env.json:/env.json"
 
   nginx:
+    restart: always
     image: nginx:1.25.4-alpine
     ports:
       - "80:80"
