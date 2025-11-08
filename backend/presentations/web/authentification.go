@@ -24,6 +24,9 @@ func (r *Presentation) registerUser(c *fiber.Ctx) error {
 
 	token, err := r.authService.RegisterUser(c.UserContext(), &registrationRequest)
 	if err != nil {
+		if errors.Is(err, authentification_service.ErrAlreadyTaken) {
+			return &fiber.Error{Code: fiber.StatusConflict, Message: err.Error()}
+		}
 		return errors.Wrap(err, "failed to register user")
 	}
 
