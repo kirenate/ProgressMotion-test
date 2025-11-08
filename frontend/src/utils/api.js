@@ -97,3 +97,144 @@ export async function logout(token) {
     return response.ok;
 }
 
+function getAuthHeaders() {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+        throw new Error('Not authenticated');
+    }
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+}
+
+export async function createBook(book) {
+    const response = await fetch(`${API_BASE}/restricted/books`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(book)
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Failed to create book';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+
+    return response.ok;
+}
+
+export async function updateBook(bookId, book) {
+    const response = await fetch(`${API_BASE}/restricted/books/${bookId}`, {
+        method: 'PATCH',
+        mode: 'cors',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(book)
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Failed to update book';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+
+    return response.ok;
+}
+
+export async function deleteBook(bookId) {
+    const response = await fetch(`${API_BASE}/restricted/books/${bookId}`, {
+        method: 'DELETE',
+        mode: 'cors',
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Failed to delete book';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+
+    return response.ok;
+}
+
+export async function createCategory(category) {
+    const response = await fetch(`${API_BASE}/restricted/categories`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(category)
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Failed to create category';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+
+    return response.ok;
+}
+
+export async function updateCategory(categoryId, category) {
+    const response = await fetch(`${API_BASE}/restricted/categories/${categoryId}`, {
+        method: 'PATCH',
+        mode: 'cors',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(category)
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Failed to update category';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+
+    return response.ok;
+}
+
+export async function deleteCategory(categoryId) {
+    const response = await fetch(`${API_BASE}/restricted/categories/${categoryId}`, {
+        method: 'DELETE',
+        mode: 'cors',
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Failed to delete category';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+
+    return response.ok;
+}
+
