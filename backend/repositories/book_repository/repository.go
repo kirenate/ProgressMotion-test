@@ -31,13 +31,12 @@ func (r *Repository) GetBooks(ctx context.Context, page int, pageSize int, sortB
 }
 
 func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize int, categoryName string, sortBy, orderBy string) (*[]schemas.Book, error) {
-	var books *[]schemas.Book
-	var category *schemas.Category
+	var books []schemas.Book
+	var category schemas.Category
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		row := r.db.WithContext(ctx).Table("category").
 			Where("name", categoryName).Where("deleted_at IS NULL").
-			Order(sortBy + " " + orderBy).
 			Find(&category)
 		if row.Error != nil {
 			return errors.Wrap(row.Error, "failed to find category")
@@ -47,11 +46,11 @@ func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize 
 			return gorm.ErrRecordNotFound
 		}
 
-		err := r.db.WithContext(ctx).Table("book").
-			Where("categories IN ?", category.ID).
-			Where("deleted_at IS NULL").
-			Limit(pageSize).Offset(page * pageSize).
-			Find(&books).Error
+		err := r.db.WithContext(ctx).Table("book"). //TODO: rewrite for something more adequate
+								Where("categories LIKE ?", "%"+category.ID.String()+"%").
+								Where("deleted_at IS NULL").
+								Limit(pageSize).Offset(page * pageSize).
+								Find(&books).Error
 		if err != nil {
 			return errors.Wrap(err, "failed to find books")
 		}
@@ -61,7 +60,7 @@ func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize 
 		return nil, errors.Wrap(err, "transaction")
 	}
 
-	return books, nil
+	return &books, nil
 
 }
 

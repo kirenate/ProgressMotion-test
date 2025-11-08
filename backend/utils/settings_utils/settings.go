@@ -31,7 +31,7 @@ type Setting struct {
 }
 
 func NewConfig() *Setting {
-	envFile, err := os.Open("./env.json")
+	envFile, err := os.Open("./dev_env.json")
 	if err != nil {
 		panic(err)
 	}
