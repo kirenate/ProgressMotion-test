@@ -42,7 +42,7 @@ func (r *Service) RegisterUser(ctx context.Context, req *schemas.LoginRequest) (
 	if req.Key == settings_utils.Settings.AdminKey {
 		user.Admin = true
 	}
-	err = r.repository.SaveUser(ctx, &user)
+	err = r.repository.CreateUser(ctx, &user)
 	if err != nil {
 		return "", errors.Wrap(err, "register user")
 	}
@@ -105,3 +105,4 @@ func saltPassword(password string) (salt string, hashSum string, err error) {
 }
 
 var ErrWrongPassword = errors.New("wrong password")
+var ErrAlreadyTaken = errors.New("username already taken")

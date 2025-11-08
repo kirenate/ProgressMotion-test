@@ -17,8 +17,8 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) SaveUser(ctx context.Context, user *schemas.User) error {
-	err := r.db.WithContext(ctx).Table("user").Save(&user).Error
+func (r *Repository) CreateUser(ctx context.Context, user *schemas.User) error {
+	err := r.db.WithContext(ctx).Table("user").Create(&user).Error
 	if err != nil {
 		return errors.Wrap(err, "save user repo")
 	}

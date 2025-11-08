@@ -47,10 +47,10 @@ func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize 
 		}
 
 		err := r.db.WithContext(ctx).Table("book"). //TODO: rewrite for something more adequate
-			Where("categories LIKE ?", "%"+category.ID.String()+"%").
-			Where("deleted_at IS NULL").
-			Limit(pageSize).Offset(page * pageSize).
-			Find(&books).Error
+								Where("categories LIKE ?", "%"+category.ID.String()+"%").
+								Where("deleted_at IS NULL").
+								Limit(pageSize).Offset(page * pageSize).
+								Find(&books).Error
 		if err != nil {
 			return errors.Wrap(err, "failed to find books")
 		}
