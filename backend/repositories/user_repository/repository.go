@@ -28,7 +28,7 @@ func (r *Repository) CreateUser(ctx context.Context, user *schemas.User) error {
 
 func (r *Repository) GetUserByUsername(ctx context.Context, username string) (*schemas.User, error) {
 	var userFound schemas.User
-	err := r.db.WithContext(ctx).Where("username", username).Find(&userFound).Error
+	err := r.db.WithContext(ctx).Table("user").Where("username", username).Find(&userFound).Error
 	if err != nil {
 		return nil, errors.Wrap(err, "get user by username repo")
 	}

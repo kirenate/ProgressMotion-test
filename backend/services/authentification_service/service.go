@@ -23,6 +23,14 @@ func NewService(repository *user_repository.Repository) *Service {
 }
 
 func (r *Service) RegisterUser(ctx context.Context, req *schemas.LoginRequest) (string, error) {
+	userFound, err := r.repository.GetUserByUsername(ctx, req.Username)
+	if err != nil {
+		return "", errors.Wrap(err, "register user")
+	}
+	if userFound != nil {
+		return "", ErrAlreadyTaken
+	}
+	
 	salt, hashSum, err := saltPassword(req.Password)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to salt password")
