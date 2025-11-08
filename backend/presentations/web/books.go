@@ -88,18 +88,18 @@ func (r *Presentation) saveBook(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusUnauthorized}
 	}
 
-	var book *schemas.Book
+	var book schemas.Book
 	err = c.BodyParser(&book)
 	if err != nil {
-		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: err.Error()}
 	}
 
-	err = validators_utils.Validate.StructExcept(&book, "ID", "CreatedAt", "UpdatedAt", "DeletedAt")
+	err = validators_utils.Validate.StructExcept(&book, "ID")
 	if err != nil {
-		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: err.Error()}
 	}
 
-	err = r.bookService.SaveBook(c.UserContext(), book)
+	err = r.bookService.SaveBook(c.UserContext(), &book)
 
 	c.Status(fiber.StatusCreated)
 
@@ -118,13 +118,13 @@ func (r *Presentation) updateBook(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid book id"}
 	}
 
-	var book *schemas.Book
+	var book schemas.Book
 	err = c.BodyParser(&book)
 	if err != nil {
-		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
+		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: err.Error()}
 	}
 
-	err = r.bookService.UpdateBook(c.UserContext(), id, book)
+	err = r.bookService.UpdateBook(c.UserContext(), id, &book)
 	if err != nil {
 		return errors.Wrap(err, "failed to update book")
 	}

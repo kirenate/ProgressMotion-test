@@ -54,6 +54,7 @@ func (r *Service) SaveBook(ctx context.Context, book *schemas.Book) error {
 	book.ID = id
 	book.CreatedAt = now
 	book.UpdatedAt = now
+
 	err := r.repository.SaveBook(ctx, book)
 	if err != nil {
 		return errors.Wrap(err, "save book")

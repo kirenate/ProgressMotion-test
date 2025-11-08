@@ -6,7 +6,7 @@ services:
       dockerfile: backend/Dockerfile
     volumes:
       - ".data:/.data"
-      - "./backend/.env:/.env"
+      - "./backend/env.json:/env.json"
 
   nginx:
     image: nginx:1.25.4-alpine
@@ -26,7 +26,7 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: $MYSQL_DBNAME
-      MYSQL_USER: $MYSQL_USER
-      MYSQL_PASSWORD: $MYSQL_PASSWORD
+      MYSQL_ROOT_PASSWORD: $MYSQL_PASS
+      MYSQL_PORT: 3306
     ports:
       - "3306:3306"

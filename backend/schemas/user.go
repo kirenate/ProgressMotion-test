@@ -23,11 +23,12 @@ type User struct {
 
 func (r *User) GenerateTokenJWT() (string, error) {
 	now := time.Now().UTC()
+	exp := now.Add(settings_utils.Settings.JwtTtl)
 	claims := jwt.MapClaims{
-		"sub":      r.ID,
+		"sub":      r.ID.String(),
 		"username": r.Username,
-		"exp":      now.Add(settings_utils.Settings.JwtTtl),
-		"iat":      now,
+		"exp":      exp.Unix(),
+		"iat":      now.Unix(),
 		"jti":      uuid.New(),
 		"admin":    false,
 	}

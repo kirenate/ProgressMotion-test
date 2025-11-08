@@ -26,6 +26,8 @@ type Setting struct {
 	JwtTtl       time.Duration
 
 	AdminKey string `json:"ADMIN_KEY"`
+
+	Cors string `json:"CORS"`
 }
 
 func NewConfig() *Setting {

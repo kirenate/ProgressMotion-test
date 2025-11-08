@@ -66,7 +66,7 @@ func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize 
 }
 
 func (r *Repository) BookInfo(ctx context.Context, id uuid.UUID) (*schemas.Book, error) {
-	var book *schemas.Book
+	var book schemas.Book
 	row := r.db.WithContext(ctx).Table("book").Where("id", id).Find(&book)
 	if row.Error != nil {
 		return nil, errors.Wrap(row.Error, "get book info")
@@ -75,7 +75,7 @@ func (r *Repository) BookInfo(ctx context.Context, id uuid.UUID) (*schemas.Book,
 	if row.RowsAffected == 0 {
 		return nil, gorm.ErrRecordNotFound
 	}
-	return book, nil
+	return &book, nil
 }
 
 func (r *Repository) SaveBook(ctx context.Context, book *schemas.Book) error {

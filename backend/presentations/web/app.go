@@ -3,6 +3,7 @@ package web
 import (
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	recover2 "github.com/gofiber/fiber/v2/middleware/recover"
@@ -35,6 +36,14 @@ func (r *Presentation) BuildApp() *fiber.App {
 	app := fiber.New(fiber.Config{
 		Immutable: true,
 	})
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     settings_utils.Settings.Cors,
+		AllowMethods:     "GET,POST,PATCH,PUT,DELETE,OPTIONS,HEAD",
+		AllowHeaders:     "Origin,Content-Type,Accept,Authorization",
+		AllowCredentials: false,
+		ExposeHeaders:    "Content-Length",
+		MaxAge:           3600,
+	}))
 	app.Use(recover2.New(recover2.Config{EnableStackTrace: true}))
 	app.Use(requestid.New())
 	app.Use(logger.New(logger.Config{
@@ -62,7 +71,7 @@ func (r *Presentation) BuildApp() *fiber.App {
 	app.Get("/api/categories", timeout.NewWithContext(r.listCategories, settings_utils.Settings.Timeout))
 
 	apiGroup.Post("/categories", timeout.NewWithContext(r.saveCategory, settings_utils.Settings.Timeout))
-	apiGroup.Patch("categories/:id", timeout.NewWithContext(r.updateCategory, settings_utils.Settings.Timeout))
+	apiGroup.Patch("/categories/:id", timeout.NewWithContext(r.updateCategory, settings_utils.Settings.Timeout))
 	apiGroup.Delete("/categories/:id", timeout.NewWithContext(r.deleteCategory, settings_utils.Settings.Timeout))
 
 	apiGroup.Get("/cart", timeout.NewWithContext(r.getCart, settings_utils.Settings.Timeout))

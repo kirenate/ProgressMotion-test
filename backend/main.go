@@ -45,7 +45,7 @@ func main() {
 	bookService := book_service.NewService(bookRepo)
 	categoryService := category_service.NewService(categoryRepo)
 	authService := authentification_service.NewService(userRepo)
-	cartService := cart_service.NewService(cartRepo)
+	cartService := cart_service.NewService(cartRepo, bookRepo)
 
 	presentation := web.NewPresentation(bookService, categoryService, authService, cartService)
 

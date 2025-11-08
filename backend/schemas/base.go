@@ -10,11 +10,11 @@ type Book struct {
 	Name        string      `json:"name"`
 	Authors     []string    `json:"authors" gorm:"serializer:json"`
 	Price       int         `json:"price"`
-	Description string      `json:"desc,omitempty"`
-	Categories  []uuid.UUID `json:"category,omitempty" gorm:"serializer:json"`
-	CreatedAt   time.Time   `json:"createdAt"`
-	UpdatedAt   time.Time   `json:"updatedAt"`
-	DeletedAt   time.Time   `json:"deletedAt"`
+	Description string      `json:"desc"`
+	Categories  []uuid.UUID `json:"categories,omitempty" gorm:"serializer:json"`
+	CreatedAt   time.Time   `json:"createdAt,omitempty"`
+	UpdatedAt   time.Time   `json:"updatedAt,omitempty"`
+	DeletedAt   time.Time   `json:"deletedAt,omitempty" gorm:"default:NULL"`
 }
 
 type Category struct {
@@ -22,7 +22,7 @@ type Category struct {
 	Name      string    `json:"name" gorm:"unique"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	DeletedAt time.Time `json:"deletedAt"`
+	DeletedAt time.Time `json:"deletedAt" gorm:"default:NULL"`
 }
 
 type Cart struct {
@@ -32,7 +32,7 @@ type Cart struct {
 	TotalPrice int         `json:"totalPrice"`
 	CreatedAt  time.Time   `json:"createdAt"`
 	UpdatedAt  time.Time   `json:"updatedAt"`
-	DeletedAt  time.Time   `json:"deletedAt"`
+	DeletedAt  time.Time   `json:"deletedAt" gorm:"default:NULL"`
 }
 
 type LoginRequest struct {

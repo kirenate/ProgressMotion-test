@@ -26,7 +26,7 @@ func (r *Presentation) saveCategory(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusUnauthorized}
 	}
 
-	var category *schemas.Category
+	var category schemas.Category
 	err = c.BodyParser(&category)
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
@@ -37,7 +37,7 @@ func (r *Presentation) saveCategory(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
 
-	err = r.categoryService.SaveCategory(c.UserContext(), category)
+	err = r.categoryService.SaveCategory(c.UserContext(), &category)
 	if err != nil {
 		return errors.Wrap(err, "failed to save category")
 	}
@@ -58,7 +58,7 @@ func (r *Presentation) updateCategory(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid category id"}
 	}
 
-	var category *schemas.Category
+	var category schemas.Category
 	err = c.BodyParser(&category)
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
@@ -69,7 +69,7 @@ func (r *Presentation) updateCategory(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
 
-	err = r.categoryService.UpdateCategory(c.UserContext(), id, category)
+	err = r.categoryService.UpdateCategory(c.UserContext(), id, &category)
 	if err != nil {
 		return errors.Wrap(err, "failed to update category")
 	}

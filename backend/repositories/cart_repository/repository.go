@@ -18,9 +18,13 @@ func NewRepository(db *gorm.DB) *Repository {
 
 func (r *Repository) GetCart(ctx context.Context, userId uuid.UUID) (*schemas.Cart, error) {
 	var cart *schemas.Cart
-	err := r.db.WithContext(ctx).Table("cart").Where("userId", userId).Find(&cart).Error
-	if err != nil {
-		return nil, errors.Wrap(err, "get cart repo")
+	row := r.db.WithContext(ctx).Table("cart").Where("user_id", userId).Find(&cart)
+	if row.Error != nil {
+		return nil, errors.Wrap(row.Error, "get cart repo")
+	}
+
+	if row.RowsAffected == 0 {
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	return cart, nil
@@ -31,7 +35,7 @@ func (r *Repository) UpdateCart(ctx context.Context, cart *schemas.Cart) error {
 	if err != nil {
 		return errors.Wrap(err, "update cart repo")
 	}
-	
+
 	return nil
 }
 

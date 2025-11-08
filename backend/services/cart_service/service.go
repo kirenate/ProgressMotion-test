@@ -18,31 +18,47 @@ type Service struct {
 	bookRepository *book_repository.Repository
 }
 
-func NewService(repo *cart_repository.Repository) *Service {
-	return &Service{cartRepository: repo}
+func NewService(cartRepo *cart_repository.Repository, bookRepo *book_repository.Repository) *Service {
+	return &Service{cartRepository: cartRepo, bookRepository: bookRepo}
+}
+
+func (r *Service) CreateCart(ctx context.Context, userId, bookId uuid.UUID) error {
+	book, err := r.bookRepository.BookInfo(ctx, bookId)
+	if err != nil {
+		return errors.Wrap(err, "create cart")
+	}
+
+	now := time.Now().UTC()
+	cart := &schemas.Cart{
+		ID:         uuid.New(),
+		UserId:     userId,
+		BookIds:    []uuid.UUID{book.ID},
+		TotalPrice: book.Price,
+		CreatedAt:  now,
+		UpdatedAt:  now,
+	}
+
+	err = r.cartRepository.SaveCart(ctx, cart)
+	if err != nil {
+		return errors.Wrap(err, "create cart")
+	}
+
+	zerolog.Ctx(ctx).Info().Interface("cart", cart).Msg("cart.created")
+
+	return nil
 }
 
 func (r *Service) Add(ctx context.Context, userId, bookId uuid.UUID) error {
 	cart, err := r.cartRepository.GetCart(ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			now := time.Now().UTC()
-			cart = &schemas.Cart{
-				ID:         uuid.New(),
-				UserId:     userId,
-				BookIds:    nil,
-				TotalPrice: 0,
-				CreatedAt:  now,
-				UpdatedAt:  now,
-				DeletedAt:  time.Time{},
-			}
-
-			err = r.cartRepository.SaveCart(ctx, cart)
+			err = r.CreateCart(ctx, userId, bookId)
 			if err != nil {
 				return errors.Wrap(err, "add book to cart")
 			}
 
-			zerolog.Ctx(ctx).Info().Interface("cart", cart).Msg("cart.created")
+			return nil
+
 		} else {
 			return errors.Wrap(err, "add book to cart")
 		}
