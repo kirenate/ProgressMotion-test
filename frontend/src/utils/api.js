@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'https://kirenate.ru/api';
 
 export async function fetchCategories() {
     const response = await fetch(`${API_BASE}/categories`);
