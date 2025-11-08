@@ -22,7 +22,7 @@ type Category struct {
 	Name      string    `json:"name" gorm:"unique"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	DeletedAt time.Time `json:"deletedAt" gorm:"default:NULL"`
+	DeletedAt time.Time `json:"deletedAt,omitempty" gorm:"default:NULL"`
 }
 
 type Cart struct {
@@ -32,7 +32,7 @@ type Cart struct {
 	TotalPrice int         `json:"totalPrice"`
 	CreatedAt  time.Time   `json:"createdAt"`
 	UpdatedAt  time.Time   `json:"updatedAt"`
-	DeletedAt  time.Time   `json:"deletedAt" gorm:"default:NULL"`
+	DeletedAt  time.Time   `json:"deletedAt,omitemptygit" gorm:"default:NULL"`
 }
 
 type LoginRequest struct {
