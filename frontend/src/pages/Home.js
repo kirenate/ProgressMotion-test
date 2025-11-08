@@ -154,6 +154,9 @@ function Home() {
                                 books={books}
                                 onEditBook={handleEditBook}
                                 onDeleteBook={handleDeleteBook}
+                                onCartUpdate={() => {
+                                    window.dispatchEvent(new Event('cartUpdated'));
+                                }}
                             />
                             <Pagination 
                                 currentPage={currentPage}

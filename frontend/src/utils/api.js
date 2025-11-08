@@ -238,3 +238,71 @@ export async function deleteCategory(categoryId) {
     return response.ok;
 }
 
+export async function addToCart(bookId) {
+    const response = await fetch(`${API_BASE}/restricted/cart`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ id: bookId })
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Failed to add to cart';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+
+    return response.ok;
+}
+
+export async function getCart() {
+    const response = await fetch(`${API_BASE}/restricted/cart`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        if (response.status === 404) {
+            return { cart: null, books: [] };
+        }
+        let errorMessage = 'Failed to get cart';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return { cart: data.cart, books: data.books || [] };
+}
+
+export async function removeFromCart(bookId) {
+    const response = await fetch(`${API_BASE}/restricted/cart/${bookId}`, {
+        method: 'DELETE',
+        mode: 'cors',
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Failed to remove from cart';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+
+    return response.ok;
+}
+
