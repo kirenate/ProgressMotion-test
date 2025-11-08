@@ -2,18 +2,16 @@ import React, { useState } from 'react';
 import { getUserInfo, isAuthenticated } from '../utils/auth';
 import { addToCart } from '../utils/api';
 
-function BookCard({ book, onEdit, onDelete, onCartUpdate }) {
+function BookCard({ book, onEdit, onDelete, onCartUpdate, onBookClick }) {
     const authors = Array.isArray(book.authors) ? book.authors.join(', ') : '';
     const price = (book.price / 100).toFixed(2);
-    const description = book.desc ? 
-        (book.desc.length > 150 ? book.desc.substring(0, 150) + '...' : book.desc) : 
-        '';
     const userInfo = getUserInfo();
     const isAdmin = userInfo && userInfo.admin;
     const isAuth = isAuthenticated();
     const [adding, setAdding] = useState(false);
 
-    const handleAddToCart = async () => {
+    const handleAddToCart = async (e) => {
+        e.stopPropagation();
         if (!isAuth) {
             alert('Please login to add items to cart');
             return;
@@ -31,12 +29,31 @@ function BookCard({ book, onEdit, onDelete, onCartUpdate }) {
         }
     };
 
+    const handleCardClick = () => {
+        if (onBookClick) {
+            onBookClick(book);
+        }
+    };
+
+    const handleEditClick = (e) => {
+        e.stopPropagation();
+        if (onEdit) {
+            onEdit(book);
+        }
+    };
+
+    const handleDeleteClick = (e) => {
+        e.stopPropagation();
+        if (onDelete) {
+            onDelete(book.id);
+        }
+    };
+
     return (
-        <div className="book-card">
+        <div className="book-card" onClick={handleCardClick}>
             <h3 className="book-title">{book.name}</h3>
             {authors && <p className="book-authors">{authors}</p>}
             <p className="book-price">${price}</p>
-            {description && <p className="book-desc">{description}</p>}
             {isAuth && (
                 <button 
                     onClick={handleAddToCart}
@@ -47,11 +64,11 @@ function BookCard({ book, onEdit, onDelete, onCartUpdate }) {
                 </button>
             )}
             {isAdmin && (
-                <div className="book-actions">
-                    <button onClick={() => onEdit(book)} className="book-edit-btn">
+                <div className="book-actions" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={handleEditClick} className="book-edit-btn">
                         Edit
                     </button>
-                    <button onClick={() => onDelete(book.id)} className="book-delete-btn">
+                    <button onClick={handleDeleteClick} className="book-delete-btn">
                         Delete
                     </button>
                 </div>

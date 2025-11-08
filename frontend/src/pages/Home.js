@@ -5,6 +5,7 @@ import CategoryMenu from '../components/CategoryMenu';
 import BookGrid from '../components/BookGrid';
 import Pagination from '../components/Pagination';
 import BookModal from '../components/BookModal';
+import BookDetail from '../components/BookDetail';
 import { fetchCategories, fetchBooks, createBook, updateBook, deleteBook } from '../utils/api';
 import { logout } from '../utils/api';
 import { getToken, getUserInfo, setToken } from '../utils/auth';
@@ -23,6 +24,7 @@ function Home() {
     const [hasMore, setHasMore] = useState(false);
     const [showBookModal, setShowBookModal] = useState(false);
     const [editingBook, setEditingBook] = useState(null);
+    const [selectedBook, setSelectedBook] = useState(null);
     const navigate = useNavigate();
     const userInfo = getUserInfo();
     const isAdmin = userInfo && userInfo.admin;
@@ -138,6 +140,14 @@ function Home() {
         }
     };
 
+    const handleBookClick = (book) => {
+        setSelectedBook(book);
+    };
+
+    const handleCloseBookDetail = () => {
+        setSelectedBook(null);
+    };
+
     return (
         <div className="container">
             <Header 
@@ -172,6 +182,7 @@ function Home() {
                                 onCartUpdate={() => {
                                     window.dispatchEvent(new Event('cartUpdated'));
                                 }}
+                                onBookClick={handleBookClick}
                             />
                             <Pagination 
                                 currentPage={currentPage}
@@ -191,6 +202,16 @@ function Home() {
                     onClose={() => {
                         setShowBookModal(false);
                         setEditingBook(null);
+                    }}
+                />
+            )}
+            {selectedBook && (
+                <BookDetail
+                    book={selectedBook}
+                    categories={categories}
+                    onClose={handleCloseBookDetail}
+                    onCartUpdate={() => {
+                        window.dispatchEvent(new Event('cartUpdated'));
                     }}
                 />
             )}

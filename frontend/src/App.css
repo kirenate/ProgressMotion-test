@@ -175,6 +175,7 @@ header h1 {
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
 }
 
 .book-card:hover {
@@ -207,6 +208,124 @@ header h1 {
     color: #555;
     font-size: 0.9em;
     line-height: 1.5;
+}
+
+.book-detail-modal {
+    max-width: 600px;
+    position: relative;
+}
+
+.book-detail-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 32px;
+    color: #999;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.book-detail-close:hover {
+    background: #f5f5f5;
+    color: #667eea;
+}
+
+.book-detail-title {
+    margin: 0 0 25px 0;
+    color: #667eea;
+    font-size: 28px;
+    font-weight: 700;
+    padding-right: 50px;
+}
+
+.book-detail-section {
+    margin-bottom: 25px;
+}
+
+.book-detail-label {
+    margin: 0 0 8px 0;
+    color: #666;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.book-detail-value {
+    margin: 0;
+    color: #333;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.book-detail-price {
+    margin: 0;
+    color: #667eea;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.book-detail-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.book-detail-category-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #f0f0f0;
+    color: #667eea;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.book-detail-description {
+    margin: 0;
+    color: #555;
+    font-size: 16px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
+.book-detail-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.book-detail-add-cart-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.book-detail-add-cart-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+}
+
+.book-detail-add-cart-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .no-books {

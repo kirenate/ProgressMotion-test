@@ -1,7 +1,7 @@
 import React from 'react';
 import BookCard from './BookCard';
 
-function BookGrid({ books, onEditBook, onDeleteBook, onCartUpdate }) {
+function BookGrid({ books, onEditBook, onDeleteBook, onCartUpdate, onBookClick }) {
     if (books.length === 0) {
         return <p className="no-books">No books found.</p>;
     }
@@ -15,6 +15,7 @@ function BookGrid({ books, onEditBook, onDeleteBook, onCartUpdate }) {
                     onEdit={onEditBook}
                     onDelete={onDeleteBook}
                     onCartUpdate={onCartUpdate}
+                    onBookClick={onBookClick}
                 />
             ))}
         </div>
