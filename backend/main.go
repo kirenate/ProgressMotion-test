@@ -21,7 +21,6 @@ import (
 )
 
 func main() {
-
 	dsn := fmt.Sprintf("%s:%s@tcp(%v:%v)/%s?charset=utf8mb4&parseTime=True",
 		settings_utils.Settings.MysqlUser, settings_utils.Settings.MysqlPass,
 		settings_utils.Settings.MysqlHost, settings_utils.Settings.MysqlPort,
@@ -33,7 +32,7 @@ func main() {
 		panic(errors.Wrap(err, "failed to connect database"))
 	}
 
-	err = db.AutoMigrate(&schemas.Book{}, &schemas.Category{})
+	err = db.AutoMigrate(&schemas.Book{}, &schemas.Category{}, &schemas.User{}, &schemas.Cart{})
 	if err != nil {
 		panic(errors.Wrap(err, "failed to merge database"))
 	}

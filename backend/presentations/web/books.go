@@ -2,9 +2,11 @@ package web
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"main.go/schemas"
+	"main.go/utils/jwt_utils"
 	validators_utils "main.go/utils/validator_utils"
 	"strings"
 )
@@ -70,14 +72,24 @@ func (r *Presentation) bookInfo(c *fiber.Ctx) error {
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid book id"}
 	}
+
 	book, err := r.bookService.BookInfo(c.UserContext(), id)
+	if err != nil {
+		return errors.Wrap(err, "failed to get book info")
+	}
 
 	return c.JSON(fiber.Map{"book": book})
 }
 
 func (r *Presentation) saveBook(c *fiber.Ctx) error {
+	token := c.Locals("user").(*jwt.Token)
+	err := jwt_utils.CheckAdmin(token)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized}
+	}
+
 	var book *schemas.Book
-	err := c.BodyParser(&book)
+	err = c.BodyParser(&book)
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
@@ -95,6 +107,12 @@ func (r *Presentation) saveBook(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) updateBook(c *fiber.Ctx) error {
+	token := c.Locals("user").(*jwt.Token)
+	err := jwt_utils.CheckAdmin(token)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized}
+	}
+
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid book id"}
@@ -115,6 +133,12 @@ func (r *Presentation) updateBook(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) deleteBook(c *fiber.Ctx) error {
+	token := c.Locals("user").(*jwt.Token)
+	err := jwt_utils.CheckAdmin(token)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized}
+	}
+
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid book id"}
@@ -129,7 +153,7 @@ func (r *Presentation) deleteBook(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) searchBooks(c *fiber.Ctx) error {
-	phrase := c.Query("phrase")
+	phrase := c.Params("phrase")
 	if phrase == "" {
 		return nil
 	}

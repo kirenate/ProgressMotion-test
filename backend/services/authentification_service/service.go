@@ -34,9 +34,13 @@ func (r *Service) RegisterUser(ctx context.Context, req *schemas.LoginRequest) (
 		Username:    req.Username,
 		PWDSalt:     salt,
 		PWDHash:     hashSum,
+		Admin:       false,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 		LastLoginAt: now,
+	}
+	if req.Key == settings_utils.Settings.AdminKey {
+		user.Admin = true
 	}
 	err = r.repository.SaveUser(ctx, &user)
 	if err != nil {

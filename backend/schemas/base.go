@@ -8,10 +8,10 @@ import (
 type Book struct {
 	ID          uuid.UUID   `json:"id" gorm:"primaryKey"`
 	Name        string      `json:"name"`
-	Authors     []string    `json:"authors"`
+	Authors     []string    `json:"authors" gorm:"serializer:json"`
 	Price       int         `json:"price"`
 	Description string      `json:"desc,omitempty"`
-	Categories  []uuid.UUID `json:"category,omitempty"`
+	Categories  []uuid.UUID `json:"category,omitempty" gorm:"serializer:json"`
 	CreatedAt   time.Time   `json:"createdAt"`
 	UpdatedAt   time.Time   `json:"updatedAt"`
 	DeletedAt   time.Time   `json:"deletedAt"`
@@ -28,7 +28,7 @@ type Category struct {
 type Cart struct {
 	ID         uuid.UUID   `json:"id" gorm:"primaryKey"`
 	UserId     uuid.UUID   `json:"userId"`
-	BookIds    []uuid.UUID `json:"bookIds"`
+	BookIds    []uuid.UUID `json:"bookIds" gorm:"serializer:json"`
 	TotalPrice int         `json:"totalPrice"`
 	CreatedAt  time.Time   `json:"createdAt"`
 	UpdatedAt  time.Time   `json:"updatedAt"`
@@ -36,6 +36,7 @@ type Cart struct {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Key      string `json:"key,omitempty"`
 }

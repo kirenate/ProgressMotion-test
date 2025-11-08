@@ -10,14 +10,15 @@ import (
 )
 
 type User struct {
-	ID          uuid.UUID `gorm:"primary_key"`
-	Username    string    `gorm:"uniqueIndex"`
-	PWDSalt     string
-	PWDHash     string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	LastLoginAt time.Time
-	DeletedAt   time.Time
+	ID          uuid.UUID `json:"id" gorm:"primary_key"`
+	Username    string    `json:"username" gorm:"uniqueIndex,length:256" validate:"len=256"`
+	PWDSalt     string    `json:"-"`
+	PWDHash     string    `json:"-" gorm:"type:BINARY(32)"`
+	Admin       bool      `json:"admin"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	LastLoginAt time.Time `json:"lastLoginAt"`
+	DeletedAt   time.Time `gorm:"default:NULL"`
 }
 
 func (r *User) GenerateTokenJWT() (string, error) {
@@ -28,6 +29,10 @@ func (r *User) GenerateTokenJWT() (string, error) {
 		"exp":      now.Add(settings_utils.Settings.JwtTtl),
 		"iat":      now,
 		"jti":      uuid.New(),
+		"admin":    false,
+	}
+	if r.Admin {
+		claims["admin"] = true
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	t, err := token.SignedString([]byte(settings_utils.Settings.SigningKey))

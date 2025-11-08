@@ -10,19 +10,19 @@ import (
 )
 
 func (r *Presentation) registerUser(c *fiber.Ctx) error {
-	var registrationRequest *schemas.LoginRequest
+	var registrationRequest schemas.LoginRequest
 
 	err := c.BodyParser(&registrationRequest)
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
 
-	err = validators_utils.Validate.Struct(&registrationRequest)
+	err = validators_utils.Validate.StructExcept(&registrationRequest, "Key")
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
 
-	token, err := r.authService.RegisterUser(c.UserContext(), registrationRequest)
+	token, err := r.authService.RegisterUser(c.UserContext(), &registrationRequest)
 	if err != nil {
 		return errors.Wrap(err, "failed to register user")
 	}
@@ -31,19 +31,19 @@ func (r *Presentation) registerUser(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) loginUser(c *fiber.Ctx) error {
-	var loginRequest *schemas.LoginRequest
+	var loginRequest schemas.LoginRequest
 
-	err := c.BodyParser(loginRequest)
+	err := c.BodyParser(&loginRequest)
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
 
-	err = validators_utils.Validate.Struct(loginRequest)
+	err = validators_utils.Validate.Struct(&loginRequest)
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
 
-	user, err := r.authService.LoginUser(c.UserContext(), loginRequest)
+	user, err := r.authService.LoginUser(c.UserContext(), &loginRequest)
 	if err != nil {
 		if errors.Is(err, authentification_service.ErrWrongPassword) {
 			return &fiber.Error{

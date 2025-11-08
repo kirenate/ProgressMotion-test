@@ -2,29 +2,53 @@ package settings_utils
 
 import (
 	"context"
-	"github.com/joeshaw/envdecode"
+	"encoding/json"
 	"github.com/rs/zerolog"
+	"io"
+	"os"
 	"time"
 )
 
 type Setting struct {
-	ServerUrl string `env:"SERVER_URL,default=localhost:8080"`
+	ServerUrl string `json:"SERVER_URL"`
 
-	MysqlUser   string `env:"MYSQL_USER,default=user"`
-	MysqlPass   string `env:"MYSQL_PASS,default=pass"`
-	MysqlHost   string `env:"MYSQL_HOST,default=localhost"`
-	MysqlPort   uint16 `env:"MYSQL_PORT,default=3306"`
-	MysqlDbname string `env:"MYSQL_DBNAME,default=dbname"`
+	MysqlUser   string `json:"MYSQL_USER"`
+	MysqlPass   string `json:"MYSQL_PASS"`
+	MysqlHost   string `json:"MYSQL_HOST"`
+	MysqlPort   uint16 `json:"MYSQL_PORT"`
+	MysqlDbname string `json:"MYSQL_DBNAME"`
 
-	Timeout time.Duration `env:"TIMEOUT,default=1m,strict"`
+	TimeoutString string `json:"TIMEOUT"`
+	Timeout       time.Duration
 
-	SigningKey string        `env:"SIGNING_KEY"`
-	JwtTtl     time.Duration `env:"JWT_TTL"`
+	SigningKey   string `json:"SIGNING_KEY"`
+	JwtTtlString string `json:"JWT_TTL"`
+	JwtTtl       time.Duration
+
+	AdminKey string `json:"ADMIN_KEY"`
 }
 
 func NewConfig() *Setting {
+	envFile, err := os.Open("./env.json")
+	if err != nil {
+		panic(err)
+	}
+	env, err := io.ReadAll(envFile)
+	if err != nil {
+		panic(err)
+	}
 	var set Setting
-	err := envdecode.Decode(&set)
+	err = json.Unmarshal(env, &set)
+	if err != nil {
+		panic(err)
+	}
+
+	set.Timeout, err = time.ParseDuration(set.TimeoutString)
+	if err != nil {
+		panic(err)
+	}
+
+	set.JwtTtl, err = time.ParseDuration(set.JwtTtlString)
 	if err != nil {
 		panic(err)
 	}

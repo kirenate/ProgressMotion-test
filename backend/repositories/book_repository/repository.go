@@ -20,7 +20,7 @@ func NewRepository(db *gorm.DB) *Repository {
 func (r *Repository) GetBooks(ctx context.Context, page int, pageSize int, sortBy, orderBy string) (*[]schemas.Book, error) {
 	var books *[]schemas.Book
 	err := r.db.WithContext(ctx).Table("book").
-		Limit(pageSize).Offset(page * pageSize).Where("deletedAt IS NULL").
+		Limit(pageSize).Offset(page * pageSize).Where("deleted_at IS NULL").
 		Order(sortBy + " " + orderBy).
 		Find(&books).Error
 	if err != nil {
@@ -35,17 +35,22 @@ func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize 
 	var category *schemas.Category
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
-		err := r.db.WithContext(ctx).Table("category").
-			Where("name", categoryName).Where("deletedAt IS NULL").
+		row := r.db.WithContext(ctx).Table("category").
+			Where("name", categoryName).Where("deleted_at IS NULL").
 			Order(sortBy + " " + orderBy).
-			Find(&category).Error
-		if err != nil {
-			return errors.Wrap(err, "failed to find category")
+			Find(&category)
+		if row.Error != nil {
+			return errors.Wrap(row.Error, "failed to find category")
 		}
 
-		err = r.db.WithContext(ctx).Table("book").
-			Limit(pageSize).Offset(page*pageSize).Where("categories IN", category.ID).
-			Where("deletedAt IS NULL").
+		if row.RowsAffected == 0 {
+			return gorm.ErrRecordNotFound
+		}
+
+		err := r.db.WithContext(ctx).Table("book").
+			Where("categories IN ?", category.ID).
+			Where("deleted_at IS NULL").
+			Limit(pageSize).Offset(page * pageSize).
 			Find(&books).Error
 		if err != nil {
 			return errors.Wrap(err, "failed to find books")
@@ -62,11 +67,14 @@ func (r *Repository) GetBooksByCategory(ctx context.Context, page int, pageSize 
 
 func (r *Repository) BookInfo(ctx context.Context, id uuid.UUID) (*schemas.Book, error) {
 	var book *schemas.Book
-	err := r.db.WithContext(ctx).Table("book").Where("id", id).Find(&book).Error
-	if err != nil {
-		return nil, errors.Wrap(err, "get book info")
+	row := r.db.WithContext(ctx).Table("book").Where("id", id).Find(&book)
+	if row.Error != nil {
+		return nil, errors.Wrap(row.Error, "get book info")
 	}
 
+	if row.RowsAffected == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
 	return book, nil
 }
 
@@ -81,7 +89,7 @@ func (r *Repository) SaveBook(ctx context.Context, book *schemas.Book) error {
 
 func (r *Repository) UpdateBook(ctx context.Context, id uuid.UUID, book *schemas.Book) error {
 	err := r.db.WithContext(ctx).Table("book").
-		Where("id", id).Omit("id", "createdAt", "deletedAt").
+		Where("id", id).Omit("id", "created_at", "deleted_at").
 		Updates(&book).Error
 	if err != nil {
 		return errors.Wrap(err, "update book repo")
@@ -93,7 +101,7 @@ func (r *Repository) UpdateBook(ctx context.Context, id uuid.UUID, book *schemas
 func (r *Repository) DeleteBook(ctx context.Context, id uuid.UUID) error {
 	err := r.db.WithContext(ctx).Table("book").
 		Where("id", id).
-		Update("deletedAt", time.Now().UTC()).Error
+		Update("deleted_at", time.Now().UTC()).Error
 
 	if err != nil {
 		return errors.Wrap(err, "delete book repo")
@@ -105,12 +113,15 @@ func (r *Repository) DeleteBook(ctx context.Context, id uuid.UUID) error {
 func (r *Repository) SearchBooks(ctx context.Context, page int, pageSize int, phrase string, sortBy, orderBy string) (*[]schemas.Book, error) {
 	var books *[]schemas.Book
 	phrase = "%" + phrase + "%"
-	err := r.db.WithContext(ctx).Table("book").
-		Where("name ILIKE ?", phrase).Where("deletedAt IS NULL").
+	row := r.db.WithContext(ctx).Table("book").
+		Where("LOWER(name) LIKE LOWER(?)", phrase).Where("deleted_at IS NULL").
 		Limit(pageSize).Offset(page * pageSize).Order(sortBy + " " + orderBy).
-		Find(&books).Error
-	if err != nil {
-		return nil, errors.Wrap(err, "search books repo")
+		Find(&books)
+	if row.Error != nil {
+		return nil, errors.Wrap(row.Error, "search books repo")
+	}
+	if row.RowsAffected == 0 {
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	return books, nil

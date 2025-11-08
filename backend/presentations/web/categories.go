@@ -2,9 +2,11 @@ package web
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"main.go/schemas"
+	"main.go/utils/jwt_utils"
 	validators_utils "main.go/utils/validator_utils"
 )
 
@@ -18,8 +20,14 @@ func (r *Presentation) listCategories(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) saveCategory(c *fiber.Ctx) error {
+	token := c.Locals("user").(*jwt.Token)
+	err := jwt_utils.CheckAdmin(token)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized}
+	}
+
 	var category *schemas.Category
-	err := c.BodyParser(&category)
+	err = c.BodyParser(&category)
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity}
 	}
@@ -39,6 +47,12 @@ func (r *Presentation) saveCategory(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) updateCategory(c *fiber.Ctx) error {
+	token := c.Locals("user").(*jwt.Token)
+	err := jwt_utils.CheckAdmin(token)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized}
+	}
+
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid category id"}
@@ -64,6 +78,12 @@ func (r *Presentation) updateCategory(c *fiber.Ctx) error {
 }
 
 func (r *Presentation) deleteCategory(c *fiber.Ctx) error {
+	token := c.Locals("user").(*jwt.Token)
+	err := jwt_utils.CheckAdmin(token)
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized}
+	}
+
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusUnprocessableEntity, Message: "invalid category id"}

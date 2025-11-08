@@ -37,10 +37,10 @@ func (r *Repository) GetUserByUsername(ctx context.Context, username string) (*s
 }
 
 func (r *Repository) UpdateLastLoginAt(ctx context.Context, userId uuid.UUID) error {
-	err := r.db.WithContext(ctx).Table("users").Where("id", userId).Update("last_login_at", time.Now().UTC()).Error
+	err := r.db.WithContext(ctx).Table("user").Where("id", userId).Update("last_login_at", time.Now().UTC()).Error
 	if err != nil {
 		return errors.Wrap(err, "failed to update lastLoginAt")
 	}
-	
+
 	return nil
 }
