@@ -53,7 +53,7 @@ func (r *Presentation) BuildApp() *fiber.App {
 	apiGroup := app.Group("/api/restricted")
 	apiGroup.Use(jwtware.New(jwtware.Config{SigningKey: jwtware.SigningKey{Key: []byte(settings_utils.Settings.SigningKey)}}))
 
-	app.Get("/metrics", monitor.New(monitor.Config{Title: "Metrics Page"}))
+	app.Get("/api/metrics", monitor.New(monitor.Config{Title: "Metrics Page"}))
 
 	app.Post("/api/auth/register", timeout.NewWithContext(r.registerUser, settings_utils.Settings.Timeout))
 	app.Post("/api/auth/login", timeout.NewWithContext(r.loginUser, settings_utils.Settings.Timeout))
