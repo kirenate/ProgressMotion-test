@@ -21,6 +21,8 @@ function Home() {
     const [currentPage, setCurrentPage] = useState(0);
     const [currentCategory, setCurrentCategory] = useState('all');
     const [currentSearch, setCurrentSearch] = useState('');
+    const [sortBy, setSortBy] = useState('name');
+    const [orderBy, setOrderBy] = useState('DESC');
     const [hasMore, setHasMore] = useState(false);
     const [showBookModal, setShowBookModal] = useState(false);
     const [editingBook, setEditingBook] = useState(null);
@@ -35,7 +37,7 @@ function Home() {
 
     useEffect(() => {
         loadBooks();
-    }, [currentPage, currentCategory, currentSearch]);
+    }, [currentPage, currentCategory, currentSearch, sortBy, orderBy]);
 
     const loadCategories = async () => {
         try {
@@ -50,7 +52,7 @@ function Home() {
         setLoading(true);
         setError(null);
         try {
-            const result = await fetchBooks(currentPage, PAGE_SIZE, currentCategory, currentSearch);
+            const result = await fetchBooks(currentPage, PAGE_SIZE, currentCategory, currentSearch, sortBy, orderBy);
             setBooks(result.books);
             setHasMore(result.books.length === PAGE_SIZE);
         } catch (error) {
@@ -171,6 +173,35 @@ function Home() {
                             </button>
                         </div>
                     )}
+                    <div className="sort-controls">
+                        <label htmlFor="sortBy">Sort by:</label>
+                        <select 
+                            id="sortBy"
+                            value={sortBy} 
+                            onChange={(e) => {
+                                setSortBy(e.target.value);
+                                setCurrentPage(0);
+                            }}
+                            className="sort-select"
+                        >
+                            <option value="name">Name</option>
+                            <option value="authors">Authors</option>
+                            <option value="price">Price</option>
+                        </select>
+                        <label htmlFor="orderBy">Order:</label>
+                        <select 
+                            id="orderBy"
+                            value={orderBy} 
+                            onChange={(e) => {
+                                setOrderBy(e.target.value);
+                                setCurrentPage(0);
+                            }}
+                            className="sort-select"
+                        >
+                            <option value="ASC">Ascending</option>
+                            <option value="DESC">Descending</option>
+                        </select>
+                    </div>
                     {loading && <div className="loading">Loading...</div>}
                     {error && <div className="error">Error: {error}</div>}
                     {!loading && !error && (

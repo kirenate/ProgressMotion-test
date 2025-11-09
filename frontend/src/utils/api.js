@@ -7,14 +7,14 @@ export async function fetchCategories() {
     return data.categories || [];
 }
 
-export async function fetchBooks(page = 0, pageSize = 10, category = 'all', search = '') {
+export async function fetchBooks(page = 0, pageSize = 10, category = 'all', search = '', sortBy = 'name', orderBy = 'DESC') {
     let url;
     if (search) {
-        url = `${API_BASE}/books/search/${encodeURIComponent(search)}?page=${page}&pageSize=${pageSize}&sortBy=name&orderBy=DESC`;
+        url = `${API_BASE}/books/search/${encodeURIComponent(search)}?page=${page}&pageSize=${pageSize}&sortBy=${sortBy}&orderBy=${orderBy}`;
     } else if (category === 'all') {
-        url = `${API_BASE}/books?page=${page}&pageSize=${pageSize}&sortBy=name&orderBy=DESC`;
+        url = `${API_BASE}/books?page=${page}&pageSize=${pageSize}&sortBy=${sortBy}&orderBy=${orderBy}`;
     } else {
-        url = `${API_BASE}/books/${encodeURIComponent(category)}?page=${page}&pageSize=${pageSize}&sortBy=name&orderBy=DESC`;
+        url = `${API_BASE}/books/${encodeURIComponent(category)}?page=${page}&pageSize=${pageSize}&sortBy=${sortBy}&orderBy=${orderBy}`;
     }
 
     const response = await fetch(url);
