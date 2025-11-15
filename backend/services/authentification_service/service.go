@@ -27,10 +27,10 @@ func (r *Service) RegisterUser(ctx context.Context, req *schemas.LoginRequest) (
 	if err != nil {
 		return "", errors.Wrap(err, "register user")
 	}
-	if userFound != nil {
+	if userFound.ID != uuid.Nil {
 		return "", ErrAlreadyTaken
 	}
-	
+
 	salt, hashSum, err := saltPassword(req.Password)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to salt password")
